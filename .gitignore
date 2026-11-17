@@ -1,0 +1,18 @@
+# Secrets: the real env file lives in ~/.config/preflight/, never here
+.env
+.env.*
+!.env.example
+
+# Fetched assignments, extracted text and raw audit output
+work/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# System
+.DS_Store
+Thumbs.db
