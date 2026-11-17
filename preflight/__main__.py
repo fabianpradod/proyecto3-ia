@@ -1,6 +1,7 @@
 """Command line entry point: python -m preflight <command>."""
 
 import argparse
+import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -8,6 +9,7 @@ from pathlib import Path
 from .canvas import Canvas, CanvasError, parse_assignment_ref
 from .config import ConfigError, load_settings
 from .export import ExportError, build_bookmarklet, read_export
+from .extract import ExtractError, extract_folder
 from .fetch import assignment_rows, fetch_assignment, import_assignment
 
 CANVAS_COMMANDS = {"fetch", "list"}
@@ -45,9 +47,14 @@ def print_rows(rows):
         print(f"{row['id']:<8} {row['due_local']:<17} {row['points'] or 0:>5g}  {row['state']:<12} {score:>6}  {row['flag']:<23} {row['name']}")
 
 
+def work_root(args, settings):
+    return Path(args.out or settings["PREFLIGHT_WORK"]).expanduser()
+
+
 def cmd_fetch(args, settings, canvas):
-    meta, out_dir = fetch_assignment(canvas, args.course_id, args.assignment_id, args.out, settings["PREFLIGHT_TZ"], download=args.download)
-    print_summary(meta, out_dir, settings["PREFLIGHT_TZ"])
+    tz = settings["PREFLIGHT_TZ"]
+    meta, out_dir = fetch_assignment(canvas, args.course_id, args.assignment_id, work_root(args, settings), tz, download=args.download)
+    print_summary(meta, out_dir, tz)
 
 
 def cmd_list(args, settings, canvas):
@@ -60,8 +67,22 @@ def cmd_import(args, settings, canvas):
     if export["kind"] == "course":
         print_rows(assignment_rows(export["assignments"], tz, datetime.now(timezone.utc)))
         return
-    meta, out_dir = import_assignment(export, args.out, tz, search_dir=args.export.parent)
+    meta, out_dir = import_assignment(export, work_root(args, settings), tz, search_dir=args.export.parent)
     print_summary(meta, out_dir, tz)
+
+
+def cmd_extract(args, settings, canvas):
+    folder = args.folder.expanduser().resolve()
+    out_dir = args.out or Path(settings["PREFLIGHT_WORK"]).expanduser() / "extract" / folder.name
+    manifest = extract_folder(folder, out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    done = [entry for entry in manifest if "text" in entry]
+    print(f"Extracted {len(done)} of {len(manifest)} docx/pptx/pdf files from {folder}")
+    print(f"  into {out_dir}")
+    for entry in manifest:
+        status = f"{entry['chars']:>8,} chars" if "text" in entry else f"   error: {entry['error']}"
+        print(f"  {status}  {entry['source']}")
 
 
 def cmd_bookmarklet(args, settings, canvas):
@@ -77,13 +98,18 @@ def build_parser():
 
     imported = commands.add_parser("import", help="read a file saved by the bookmarklet")
     imported.add_argument("export", type=Path, help="preflight_<course>_<assignment>.json or preflight_<course>_assignments.json")
-    imported.add_argument("--out", type=Path, default=Path("work"), help="output folder (default: work)")
+    imported.add_argument("--out", type=Path, help="work folder (default: PREFLIGHT_WORK, ~/.cache/preflight)")
     imported.set_defaults(handler=cmd_import)
+
+    extract = commands.add_parser("extract", help="convert a folder's docx, pptx and pdf files to text")
+    extract.add_argument("folder", type=Path, help="folder or repository to read; it is never written to")
+    extract.add_argument("--out", type=Path, help="output folder (default: <work>/extract/<folder name>)")
+    extract.set_defaults(handler=cmd_extract)
 
     fetch = commands.add_parser("fetch", help="get an assignment through the Canvas API (needs a token)")
     fetch.add_argument("assignment", help="Canvas assignment URL, or an assignment id with --course")
     fetch.add_argument("--course", type=int, help="course id, when the assignment is given as an id")
-    fetch.add_argument("--out", type=Path, default=Path("work"), help="output folder (default: work)")
+    fetch.add_argument("--out", type=Path, help="work folder (default: PREFLIGHT_WORK, ~/.cache/preflight)")
     fetch.add_argument("--download", action="store_true", help="also download files linked in the description")
     fetch.set_defaults(handler=cmd_fetch)
 
@@ -103,7 +129,7 @@ def main(argv=None):
         settings = load_settings(require_token=needs_canvas)
         canvas = Canvas(settings["CANVAS_BASE_URL"], settings["CANVAS_TOKEN"]) if needs_canvas else None
         args.handler(args, settings, canvas)
-    except (ConfigError, CanvasError, ExportError, ValueError) as error:
+    except (ConfigError, CanvasError, ExportError, ExtractError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
     return 0

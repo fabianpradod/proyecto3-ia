@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from preflight.config import ConfigError, load_settings
@@ -26,6 +28,8 @@ def test_defaults_when_only_token_is_set(tmp_path):
     settings = load_settings(env_path=write_env(tmp_path, "CANVAS_TOKEN=abc\n"), environ={})
     assert settings["CANVAS_BASE_URL"] == "https://uvg.instructure.com"
     assert settings["PREFLIGHT_TZ"] == "America/Guatemala"
+    # Outside any repo, so auditing this repo never exposes or modifies work files.
+    assert settings["PREFLIGHT_WORK"] == str(Path.home() / ".cache" / "preflight")
 
 
 def test_missing_token_names_the_file(tmp_path):

@@ -56,11 +56,17 @@ este repositorio y de cualquier carpeta auditada, y llenar `CANVAS_TOKEN`.
 
 ```bash
 python -m preflight import ~/Downloads/preflight_46981_959073.json
+python -m preflight extract ~/ruta/a/mi/entrega
 ```
 
-Escribe en `work/<tarea>/` el texto numerado de las instrucciones (`spec.md`) y los datos
-de la tarea (`meta.json`). Con el archivo de la lista del curso, muestra las tareas
-vencidas o abiertas sin entrega.
+`import` escribe en `~/.cache/preflight/<tarea>/` el texto numerado de las instrucciones
+(`spec.md`) y los datos de la tarea (`meta.json`). Con el archivo de la lista del curso,
+muestra las tareas vencidas o abiertas sin entrega.
+
+`extract` convierte a texto los docx, pptx (con notas del orador) y pdf de la entrega y
+los guarda en `~/.cache/preflight/extract/<carpeta>/`. Nunca escribe dentro de la carpeta
+revisada. Los archivos de trabajo quedan fuera del repositorio para que auditar este mismo
+repositorio no los exponga ni los modifique.
 
 Pendiente: auditoría y reporte.
 

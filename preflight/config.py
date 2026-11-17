@@ -7,6 +7,8 @@ DEFAULT_ENV_PATH = Path.home() / ".config" / "preflight" / ".env"
 DEFAULTS = {
     "CANVAS_BASE_URL": "https://uvg.instructure.com",
     "PREFLIGHT_TZ": "America/Guatemala",
+    # Outside any repo, so auditing this repo never exposes or modifies work files.
+    "PREFLIGHT_WORK": str(Path.home() / ".cache" / "preflight"),
 }
 
 
