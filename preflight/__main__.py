@@ -6,6 +6,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .audit import PROMPT_VERSION, AuditError, run_audit
 from .canvas import Canvas, CanvasError, parse_assignment_ref
 from .checks import resolve_as_of, run_checks
 from .config import ConfigError, load_settings
@@ -74,28 +75,57 @@ def cmd_import(args, settings, canvas):
     print_summary(meta, out_dir, tz)
 
 
-def cmd_check(args, settings, canvas):
-    meta_path = work_root(args, settings) / str(args.assignment_id) / "meta.json"
+def load_meta(work, assignment_id):
+    meta_path = work / str(assignment_id) / "meta.json"
     if not meta_path.exists():
-        raise ValueError(f"no data for assignment {args.assignment_id} at {meta_path}; run import first")
-    meta = json.loads(meta_path.read_text(encoding="utf-8"))
-    as_of = resolve_as_of(args.as_of, meta, datetime.now(timezone.utc))
-    folder = args.folder.expanduser().resolve() if args.folder else None
-    results = run_checks(meta, folder, as_of)
+        raise ValueError(f"no data for assignment {assignment_id} at {meta_path}; run import first")
+    return json.loads(meta_path.read_text(encoding="utf-8"))
+
+
+def write_checks(work, meta, folder, as_of_value):
+    as_of = resolve_as_of(as_of_value, meta, datetime.now(timezone.utc))
     report = {
         "assignment_id": meta["assignment_id"],
         "as_of": as_of.isoformat(timespec="seconds"),
         "as_of_local": to_local(as_of.isoformat(), meta["timezone"]),
         "folder": str(folder) if folder else None,
-        "results": results,
+        "results": run_checks(meta, folder, as_of),
     }
-    out_path = meta_path.with_name("checks.json")
+    out_path = work / str(meta["assignment_id"]) / "checks.json"
     out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    return report, out_path
+
+
+def cmd_check(args, settings, canvas):
+    work = work_root(args, settings)
+    meta = load_meta(work, args.assignment_id)
+    folder = args.folder.expanduser().resolve() if args.folder else None
+    report, out_path = write_checks(work, meta, folder, args.as_of)
     print(f"{meta['name']}: checks as of {report['as_of_local']} ({meta['timezone']})")
-    for item in results:
+    for item in report["results"]:
         label = item["status"].upper() if item["status"] == "problem" else item["status"]
         print(f"  {label:<8} {item['check']:<16} {item['summary']}")
     print(f"  wrote {out_path}")
+
+
+def cmd_audit(args, settings, canvas):
+    work = work_root(args, settings)
+    meta = load_meta(work, args.assignment_id)
+    folder = args.folder.expanduser().resolve()
+    report, _ = write_checks(work, meta, folder, args.as_of)
+    print(f"Auditing {meta['name']} as of {report['as_of_local']} with {args.model} (prompt {PROMPT_VERSION}); this takes a few minutes")
+    audit = run_audit(meta, report, folder, work, args.model)
+    with_points = [c for c in audit["findings"]["criterios"] if c["puntos"] is not None]
+    for item in audit["findings"]["criterios"]:
+        points = f"{item['puntos_en_riesgo'] or 0:g}/{item['puntos']:g}" if item["puntos"] is not None else "-"
+        print(f"  {item['estado']:<14} {points:>9}  {item['criterio'][:80]}")
+    at_risk = sum(c["puntos_en_riesgo"] or 0 for c in with_points)
+    print(f"  points at risk: {at_risk:g} of {sum(c['puntos'] for c in with_points):g}")
+    run = audit["run"]
+    print(f"  folder unchanged: {'yes' if audit['folder_unchanged'] else 'NO'}   model: {', '.join(run['models']) or args.model}   turns: {run['num_turns']}   time: {(run['duration_ms'] or 0) / 1000:.0f} s")
+    if run["permission_denials"]:
+        print(f"  blocked tool calls: {len(run['permission_denials'])} (the agent tried to go outside its sandbox)")
+    print(f"  wrote {work / str(meta['assignment_id']) / 'audit.json'}")
 
 
 def cmd_extract(args, settings, canvas):
@@ -136,6 +166,14 @@ def build_parser():
     check.add_argument("--out", type=Path, help="work folder (default: PREFLIGHT_WORK, ~/.cache/preflight)")
     check.set_defaults(handler=cmd_check)
 
+    audit = commands.add_parser("audit", help="checks plus the read-only audit agent")
+    audit.add_argument("assignment_id", type=int, help="assignment id, already imported")
+    audit.add_argument("folder", type=Path, help="submission folder or repository; it is never written to")
+    audit.add_argument("--as-of", default="now", help="now (default), due (one minute before the deadline) or a local time")
+    audit.add_argument("--model", default="opus", help="Claude model alias for the agent (default: opus)")
+    audit.add_argument("--out", type=Path, help="work folder (default: PREFLIGHT_WORK, ~/.cache/preflight)")
+    audit.set_defaults(handler=cmd_audit)
+
     extract = commands.add_parser("extract", help="convert a folder's docx, pptx and pdf files to text")
     extract.add_argument("folder", type=Path, help="folder or repository to read; it is never written to")
     extract.add_argument("--out", type=Path, help="output folder (default: <work>/extract/<folder name>)")
@@ -164,7 +202,7 @@ def main(argv=None):
         settings = load_settings(require_token=needs_canvas)
         canvas = Canvas(settings["CANVAS_BASE_URL"], settings["CANVAS_TOKEN"]) if needs_canvas else None
         args.handler(args, settings, canvas)
-    except (ConfigError, CanvasError, ExportError, ExtractError, ValueError) as error:
+    except (ConfigError, CanvasError, ExportError, ExtractError, AuditError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 1
     return 0

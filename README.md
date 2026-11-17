@@ -81,7 +81,30 @@ los guarda en `~/.cache/preflight/extract/<carpeta>/`. Nunca escribe dentro de l
 revisada. Los archivos de trabajo quedan fuera del repositorio para que auditar este mismo
 repositorio no los exponga ni los modifique.
 
-Pendiente: auditoría y reporte.
+```bash
+python -m preflight audit 959073 ~/ruta/a/mi/entrega
+```
+
+`audit` corre `check` y después el agente auditor (Claude Code sin interfaz, `claude -p`).
+El agente trabaja sobre una carpeta preparada en `~/.cache/preflight/<tarea>/agent/` que
+solo tiene: las instrucciones numeradas, los hechos de `check`, un inventario, una copia de
+la entrega sin archivos ocultos, secretos, binarios, archivos grandes ni archivos ignorados
+por git, y el texto extraído de los docx, pptx y pdf. Las notas y los comentarios del
+profesor nunca llegan al agente.
+
+Límites del agente, comprobados con una prueba de archivos trampa:
+
+- Solo existen las herramientas Read, Grep y Glob: no puede escribir ni ejecutar nada.
+- Un intento de leer fuera de su carpeta queda bloqueado y registrado.
+- Sin servidores MCP, sin sesión guardada y sin la configuración ni el CLAUDE.md del
+  usuario (`--setting-sources project`), para que el resultado dependa solo del prompt.
+- La respuesta debe cumplir el esquema `preflight/schema.json`: cada criterio lleva al
+  menos una cita con su línea (L001...).
+
+El prompt está versionado en `preflight/prompts/`. `audit.json` guarda el modelo que corrió,
+la versión del prompt y una huella de la carpeta antes y después, que debe ser igual.
+
+Pendiente: reporte.
 
 ## Pruebas
 
