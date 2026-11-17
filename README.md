@@ -57,7 +57,20 @@ este repositorio y de cualquier carpeta auditada, y llenar `CANVAS_TOKEN`.
 ```bash
 python -m preflight import ~/Downloads/preflight_46981_959073.json
 python -m preflight extract ~/ruta/a/mi/entrega
+python -m preflight check 959073 ~/ruta/a/mi/entrega
 ```
+
+Con la lista del curso también se puede importar una tarea sin exportarla aparte
+(`import preflight_46981_assignments.json --assignment 953531`), salvo que tenga archivos
+adjuntos: la lista no trae sus tamaños.
+
+`check` revisa con reglas fijas lo que no necesita juicio y lo guarda en `checks.json`:
+tiempo restante, estado de la entrega en Canvas, fechas del texto que ya pasaron (como
+entregas intermedias que no aparecen como tarea propia), suma de la rúbrica, archivos
+adjuntos sin leer, contenido de la carpeta y, si es un repositorio, cambios sin commit,
+commits sin push, commits que no están en la rama principal y commits después de la fecha
+de entrega. No usa notas ni comentarios del profesor. Con `--as-of due` revisa como si
+fuera un minuto antes de la fecha de entrega, para probar con tareas pasadas.
 
 `import` escribe en `~/.cache/preflight/<tarea>/` el texto numerado de las instrucciones
 (`spec.md`) y los datos de la tarea (`meta.json`). Con el archivo de la lista del curso,

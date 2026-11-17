@@ -7,10 +7,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .canvas import Canvas, CanvasError, parse_assignment_ref
+from .checks import resolve_as_of, run_checks
 from .config import ConfigError, load_settings
-from .export import ExportError, build_bookmarklet, read_export
+from .export import ExportError, assignment_from_course, build_bookmarklet, read_export
 from .extract import ExtractError, extract_folder
-from .fetch import assignment_rows, fetch_assignment, import_assignment
+from .fetch import assignment_rows, fetch_assignment, import_assignment, to_local
 
 CANVAS_COMMANDS = {"fetch", "list"}
 
@@ -65,10 +66,36 @@ def cmd_import(args, settings, canvas):
     export = read_export(args.export)
     tz = settings["PREFLIGHT_TZ"]
     if export["kind"] == "course":
-        print_rows(assignment_rows(export["assignments"], tz, datetime.now(timezone.utc)))
-        return
+        if args.assignment is None:
+            print_rows(assignment_rows(export["assignments"], tz, datetime.now(timezone.utc)))
+            return
+        export = assignment_from_course(export, args.assignment)
     meta, out_dir = import_assignment(export, work_root(args, settings), tz, search_dir=args.export.parent)
     print_summary(meta, out_dir, tz)
+
+
+def cmd_check(args, settings, canvas):
+    meta_path = work_root(args, settings) / str(args.assignment_id) / "meta.json"
+    if not meta_path.exists():
+        raise ValueError(f"no data for assignment {args.assignment_id} at {meta_path}; run import first")
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    as_of = resolve_as_of(args.as_of, meta, datetime.now(timezone.utc))
+    folder = args.folder.expanduser().resolve() if args.folder else None
+    results = run_checks(meta, folder, as_of)
+    report = {
+        "assignment_id": meta["assignment_id"],
+        "as_of": as_of.isoformat(timespec="seconds"),
+        "as_of_local": to_local(as_of.isoformat(), meta["timezone"]),
+        "folder": str(folder) if folder else None,
+        "results": results,
+    }
+    out_path = meta_path.with_name("checks.json")
+    out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"{meta['name']}: checks as of {report['as_of_local']} ({meta['timezone']})")
+    for item in results:
+        label = item["status"].upper() if item["status"] == "problem" else item["status"]
+        print(f"  {label:<8} {item['check']:<16} {item['summary']}")
+    print(f"  wrote {out_path}")
 
 
 def cmd_extract(args, settings, canvas):
@@ -98,8 +125,16 @@ def build_parser():
 
     imported = commands.add_parser("import", help="read a file saved by the bookmarklet")
     imported.add_argument("export", type=Path, help="preflight_<course>_<assignment>.json or preflight_<course>_assignments.json")
+    imported.add_argument("--assignment", type=int, help="with a course export: import this assignment instead of listing")
     imported.add_argument("--out", type=Path, help="work folder (default: PREFLIGHT_WORK, ~/.cache/preflight)")
     imported.set_defaults(handler=cmd_import)
+
+    check = commands.add_parser("check", help="facts that need no judgment: dates, submission, files and git")
+    check.add_argument("assignment_id", type=int, help="assignment id, already imported")
+    check.add_argument("folder", type=Path, nargs="?", help="submission folder or repository; it is never written to")
+    check.add_argument("--as-of", default="now", help="now (default), due (one minute before the deadline) or a local time like 2026-10-26T18:00")
+    check.add_argument("--out", type=Path, help="work folder (default: PREFLIGHT_WORK, ~/.cache/preflight)")
+    check.set_defaults(handler=cmd_check)
 
     extract = commands.add_parser("extract", help="convert a folder's docx, pptx and pdf files to text")
     extract.add_argument("folder", type=Path, help="folder or repository to read; it is never written to")
