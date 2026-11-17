@@ -31,3 +31,13 @@ def read_export(path, kind=None):
     if kind and data["kind"] != kind:
         raise ExportError(f"{path} holds a {data['kind']} export; this needs a {kind} export.")
     return data
+
+
+def assignment_from_course(course, assignment_id):
+    """Turn one entry of a course export into an assignment export, without file details."""
+    for item in course["assignments"]:
+        if item.get("id") == assignment_id:
+            assignment = {key: value for key, value in item.items() if key != "submission"}
+            return {**{key: course[key] for key in ("format", "base_url", "course_id", "exported_at")},
+                    "kind": "assignment", "assignment": assignment, "submission": item.get("submission"), "files": []}
+    raise ExportError(f"assignment {assignment_id} is not in the course export")

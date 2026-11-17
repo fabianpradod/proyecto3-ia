@@ -6,7 +6,7 @@ from urllib.parse import unquote
 import pytest
 
 from preflight.canvas import CanvasError, download_file
-from preflight.export import ExportError, build_bookmarklet, export_source, read_export
+from preflight.export import ExportError, assignment_from_course, build_bookmarklet, export_source, read_export
 from preflight.fetch import import_assignment
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -105,6 +105,30 @@ def test_import_flags_linked_files_not_found_locally(tmp_path):
     meta, _ = import_assignment(evaluaciones_export(), tmp_path / "work", TZ, search_dir=tmp_path, now=NOW)
     assert meta["linked_files"][0]["missing_local"] is True
     assert "path" not in meta["linked_files"][0]
+
+
+def course_export():
+    assignments = []
+    for name in ("assignment_959073.json", "assignment_958579.json"):
+        item = json.loads((FIXTURES / name).read_text(encoding="utf-8"))
+        item["submission"] = {"workflow_state": "unsubmitted", "submitted_at": None}
+        assignments.append(item)
+    return {"format": "preflight-export/1", "kind": "course", "base_url": "https://uvg.instructure.com",
+            "course_id": 46981, "exported_at": "2026-11-16T22:00:00Z", "assignments": assignments}
+
+
+def test_one_assignment_can_be_imported_from_a_course_export(tmp_path):
+    export = assignment_from_course(course_export(), 958579)
+    meta, _ = import_assignment(export, tmp_path, TZ, now=NOW)
+    assert meta["assignment_id"] == 958579
+    assert meta["submission"]["state"] == "unsubmitted"
+    # The course list has no file details, so linked files are reported as unread.
+    assert meta["linked_files"][0]["error"] == "not in the export"
+
+
+def test_course_export_without_that_assignment_is_an_error():
+    with pytest.raises(ExportError):
+        assignment_from_course(course_export(), 1)
 
 
 def test_download_refuses_hosts_other_than_canvas(tmp_path):
