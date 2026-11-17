@@ -18,7 +18,8 @@ Pendiente: justificación a partir de la tabla de exploración (`exploracion/`).
 
 ## Cómo funciona
 
-1. Descarga de Canvas las instrucciones, la fecha de entrega y el estado de la entrega.
+1. Un marcador del navegador guarda de Canvas las instrucciones, la fecha de entrega y el
+   estado de la entrega, usando la sesión ya iniciada.
 2. Convierte a texto los archivos de la entrega (docx, pptx, pdf), sin tocar la carpeta original.
 3. Revisa con reglas fijas lo que no necesita juicio: fechas, archivos y commits.
 4. Un agente con permisos de solo lectura compara la entrega con cada criterio.
@@ -28,21 +29,40 @@ Pendiente: justificación a partir de la tabla de exploración (`exploracion/`).
 
 ## Requisitos
 
-- Python 3 con requests, beautifulsoup4, lxml, pypdf, pyyaml y pytest.
+- Python 3 con las librerías de `requirements.txt`.
 - Claude Code (de pago, requiere suscripción).
-- Un token de acceso personal de Canvas.
+- Chrome (u otro navegador) con la sesión de Canvas iniciada.
 
 ## Configuración
 
-1. En Canvas: Cuenta > Configuraciones > Nuevo token de acceso. Ponerle fecha de vencimiento.
-2. Copiar `.env.example` a `~/.config/preflight/.env` y llenar `CANVAS_TOKEN`.
+UVG no permite que los estudiantes generen tokens de la API de Canvas, así que los datos
+salen del navegador con un marcador (bookmarklet). El marcador solo hace consultas de
+lectura (GET) al mismo sitio de Canvas y guarda un archivo JSON en Descargas.
 
-El archivo con el token queda fuera de este repositorio y fuera de cualquier carpeta
-auditada, para que el agente no pueda leerlo.
+1. Copiar el marcador: `python -m preflight bookmarklet | pbcopy`
+2. En Chrome: administrador de marcadores (Cmd+Shift+O) > menú de tres puntos > Agregar
+   marcador nuevo. Nombre: `Pre-flight export`. URL: pegar.
+3. Abrir la tarea en Canvas y hacer clic en el marcador. Se descarga
+   `preflight_<curso>_<tarea>.json`. En la página de tareas del curso, descarga la lista
+   completa (`preflight_<curso>_assignments.json`).
+4. Si la tarea enlaza archivos (por ejemplo una plantilla o un PDF con la rúbrica),
+   descargarlos desde la misma página a la misma carpeta.
+
+Si tu Canvas sí permite tokens, `python -m preflight fetch` y `python -m preflight list`
+usan la API directamente: copiar `.env.example` a `~/.config/preflight/.env`, fuera de
+este repositorio y de cualquier carpeta auditada, y llenar `CANVAS_TOKEN`.
 
 ## Uso
 
-Pendiente.
+```bash
+python -m preflight import ~/Downloads/preflight_46981_959073.json
+```
+
+Escribe en `work/<tarea>/` el texto numerado de las instrucciones (`spec.md`) y los datos
+de la tarea (`meta.json`). Con el archivo de la lista del curso, muestra las tareas
+vencidas o abiertas sin entrega.
+
+Pendiente: auditoría y reporte.
 
 ## Pruebas
 
