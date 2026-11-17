@@ -125,6 +125,14 @@ def cmd_audit(args, settings, canvas):
     print(f"  folder unchanged: {'yes' if audit['folder_unchanged'] else 'NO'}   model: {', '.join(run['models']) or args.model}   turns: {run['num_turns']}   time: {(run['duration_ms'] or 0) / 1000:.0f} s")
     if run["permission_denials"]:
         print(f"  blocked tool calls: {len(run['permission_denials'])} (the agent tried to go outside its sandbox)")
+    validation = audit["validation"]
+    counts = validation["counts"]
+    if validation["valid"]:
+        print(f"  validation: ok ({counts['citations']} citations word for word, {counts['evidence']} evidence entries)")
+    else:
+        print(f"  validation: {len(validation['issues'])} problems")
+        for item in validation["issues"]:
+            print(f"    {item['rule']:<20} {item['where']:<26} {item['detail'][:90]}")
     print(f"  wrote {work / str(meta['assignment_id']) / 'audit.json'}")
 
 

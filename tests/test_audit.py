@@ -149,8 +149,11 @@ def test_run_audit_saves_findings_and_proves_the_folder_did_not_change(tmp_path)
     assert audit["run"]["models"] == ["claude-opus-5"]
     assert audit["run"]["num_turns"] == 7
     assert calls[0][1] == tmp_path / "work" / "959073" / "agent"
+    assert audit["validation"]["valid"] is True
+    assert audit["validation"]["counts"]["citations"] == 1
     saved = json.loads((tmp_path / "work" / "959073" / "audit.json").read_text(encoding="utf-8"))
     assert saved["findings"] == FINDINGS
+    assert saved["validation"] == audit["validation"]
     assert [line["id"] for line in saved["lines"]] == ["L001", "L002"]
 
 

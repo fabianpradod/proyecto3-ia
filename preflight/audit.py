@@ -13,6 +13,7 @@ from pathlib import Path
 from string import Template
 
 from .extract import EXTRACTORS, ExtractError, extract_folder, iter_files
+from .validate import validate
 
 PROMPT_VERSION = "v1"
 PACKAGE = Path(__file__).parent
@@ -211,6 +212,7 @@ def run_audit(meta, checks, folder, work_root, model, runner=None):
         "lines": build_instructions(meta),
         "findings": findings,
     }
+    audit["validation"] = validate(audit)
     out = work_root / str(meta["assignment_id"]) / "audit.json"
     out.write_text(json.dumps(audit, ensure_ascii=False, indent=2), encoding="utf-8")
     return audit
