@@ -13,6 +13,8 @@ from .config import ConfigError, load_settings
 from .export import ExportError, assignment_from_course, build_bookmarklet, read_export
 from .extract import ExtractError, extract_folder
 from .fetch import assignment_rows, fetch_assignment, import_assignment, to_local
+from .report import render_report
+from .validate import validate
 
 CANVAS_COMMANDS = {"fetch", "list"}
 
@@ -125,6 +127,7 @@ def cmd_audit(args, settings, canvas):
     print(f"  folder unchanged: {'yes' if audit['folder_unchanged'] else 'NO'}   model: {', '.join(run['models']) or args.model}   turns: {run['num_turns']}   time: {(run['duration_ms'] or 0) / 1000:.0f} s")
     if run["permission_denials"]:
         print(f"  blocked tool calls: {len(run['permission_denials'])} (the agent tried to go outside its sandbox)")
+    report_path = write_report(work, audit, report)
     validation = audit["validation"]
     counts = validation["counts"]
     if validation["valid"]:
@@ -134,6 +137,24 @@ def cmd_audit(args, settings, canvas):
         for item in validation["issues"]:
             print(f"    {item['rule']:<20} {item['where']:<26} {item['detail'][:90]}")
     print(f"  wrote {work / str(meta['assignment_id']) / 'audit.json'}")
+    print(f"  report: {report_path}")
+
+
+def write_report(work, audit, checks):
+    path = work / str(audit["assignment_id"]) / "reporte.md"
+    path.write_text(render_report(audit, checks), encoding="utf-8")
+    return path
+
+
+def cmd_report(args, settings, canvas):
+    work = work_root(args, settings)
+    base = work / str(args.assignment_id)
+    if not (base / "audit.json").exists():
+        raise ValueError(f"no audit for assignment {args.assignment_id} at {base}; run audit first")
+    audit = json.loads((base / "audit.json").read_text(encoding="utf-8"))
+    checks = json.loads((base / "checks.json").read_text(encoding="utf-8")) if (base / "checks.json").exists() else {}
+    audit["validation"] = validate(audit)  # re-check with the current rules
+    print(write_report(work, audit, checks))
 
 
 def cmd_extract(args, settings, canvas):
@@ -181,6 +202,11 @@ def build_parser():
     audit.add_argument("--model", default="opus", help="Claude model alias for the agent (default: opus)")
     audit.add_argument("--out", type=Path, help="work folder (default: PREFLIGHT_WORK, ~/.cache/preflight)")
     audit.set_defaults(handler=cmd_audit)
+
+    report = commands.add_parser("report", help="write the Spanish report from a saved audit")
+    report.add_argument("assignment_id", type=int, help="assignment id, already audited")
+    report.add_argument("--out", type=Path, help="work folder (default: PREFLIGHT_WORK, ~/.cache/preflight)")
+    report.set_defaults(handler=cmd_report)
 
     extract = commands.add_parser("extract", help="convert a folder's docx, pptx and pdf files to text")
     extract.add_argument("folder", type=Path, help="folder or repository to read; it is never written to")

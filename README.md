@@ -104,7 +104,15 @@ Límites del agente, comprobados con una prueba de archivos trampa:
 El prompt está versionado en `preflight/prompts/`. `audit.json` guarda el modelo que corrió,
 la versión del prompt y una huella de la carpeta antes y después, que debe ser igual.
 
-Pendiente: reporte.
+Al terminar, `audit` valida la respuesta del agente con reglas fijas: cada cita debe estar
+textual en su línea, cada archivo de evidencia debe existir en la carpeta real, los puntos
+en riesgo deben cuadrar con el estado y con la rúbrica, y los criterios deben cubrir toda
+la rúbrica. Los problemas no se corrigen: se marcan en el reporte.
+
+El reporte queda en `~/.cache/preflight/<tarea>/reporte.md`, en español: puntos en riesgo,
+tabla de criterios, cada criterio con sus citas y su evidencia, fechas del texto, hechos
+revisados por script, lo que no se pudo revisar y el resultado de la validación.
+`python -m preflight report <tarea>` lo vuelve a generar desde una auditoría guardada.
 
 ## Pruebas
 

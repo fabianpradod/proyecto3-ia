@@ -1,0 +1,78 @@
+# Spanish text for the report. Placeholders in braces are filled by preflight/report.py.
+estados:
+  cumple: Cumple
+  parcial: Parcial
+  falta: Falta
+  no_verificable: No verificable
+niveles:
+  problem: Problema
+  warning: Aviso
+  ok: Bien
+  info: Nota
+validacion:
+  quote_not_verbatim: cita no textual
+  unknown_line: línea inexistente
+  evidence_not_found: evidencia que no existe
+  risk_over_points: puntos en riesgo fuera de rango
+  risk_inconsistent: puntos en riesgo que no cuadran con el estado
+  points_not_in_rubric: puntos distintos a los de la rúbrica
+  rubric_not_covered: los criterios no cubren toda la rúbrica
+  folder_changed: la carpeta cambió durante la revisión
+hechos:
+  deadline.ok: "Quedan {hours_left} horas para la fecha de entrega ({due_local})."
+  deadline.warning: "Quedan {hours_left} horas para la fecha de entrega ({due_local})."
+  deadline.problem: "La fecha de entrega ({due_local}) ya pasó."
+  deadline.info: "Canvas no tiene fecha de entrega."
+  submission.ok: "Ya hay una entrega en Canvas ({submitted_local})."
+  submission.warning: "Todavía no hay nada entregado en Canvas."
+  submission.problem: "No hay nada entregado en Canvas y la fecha de entrega ya pasó."
+  submission.info: "La entrega se hace fuera de Canvas."
+  text_dates.warning: "Fechas del texto que ya pasaron: {passed}. Revisa que esas entregas estén hechas."
+  text_dates.info: "El texto menciona {count} fechas."
+  text_dates.ok: "El texto no menciona otras fechas."
+  rubric.ok: "La rúbrica tiene {count} criterios que suman {total} puntos."
+  rubric.warning: "Los criterios de la rúbrica suman {total}, pero el texto dice {stated_total}."
+  rubric.info: "Las instrucciones no tienen tabla de puntos."
+  sources.ok: "Todas las instrucciones están en el texto de Canvas."
+  sources.warning: "Archivos adjuntos que no se leyeron: {unread}."
+  sources.info: "Enlaces externos que no se leyeron (referencias o datos): {count}."
+  folder.ok: "La carpeta tiene {files} archivos."
+  folder.problem: "La carpeta no existe o está vacía."
+  file_types.ok: "Hay archivos de los tipos que acepta Canvas: {found}."
+  file_types.problem: "No hay archivos de los tipos que acepta Canvas: {allowed}."
+  file_types.info: "Canvas no restringe los tipos de archivo."
+  git.repo: "Repositorio git en la rama {branch}."
+  git.norepo: "La carpeta no es un repositorio git."
+  git_uncommitted.ok: "No hay cambios sin commit."
+  git_uncommitted.warning: "Hay {changes} cambios sin commit."
+  git_unpushed.ok: "Todo está subido al remoto."
+  git_unpushed.warning: "Hay {ahead} commits sin push."
+  git_unpushed.noupstream: "La rama no tiene remoto: nunca se subió."
+  git_branch.ok: "La rama {branch} no tiene nada fuera de {default}."
+  git_branch.warning: "{not_in_default} commits de la rama {branch} no están en {default}, la rama que ve quien revisa."
+  git_after_due.ok: "No hay commits después de la fecha de entrega."
+  git_after_due.warning: "Hay {count} commits con fecha posterior a la entrega: {commits}."
+textos:
+  revision: "Revisión como si se entregara el {as_of} (hora de Guatemala)."
+  modelo: "Modelo: {model}. Prompt: {prompt}. {carpeta}"
+  carpeta_igual: "La carpeta no cambió durante la revisión."
+  carpeta_cambio: "La carpeta cambió durante la revisión: el resultado no es confiable."
+  resumen: Resumen
+  puntos: "**Puntos en riesgo: {risk} de {total}.**"
+  sin_puntos: "Las instrucciones no tienen puntos por criterio."
+  criterios: Criterios
+  tabla: "| Criterio | Estado | En riesgo | Línea |"
+  estado_linea: "Estado: {estado}. En riesgo: {riesgo}."
+  segun: "Según las instrucciones:"
+  evidencia: "Evidencia revisada:"
+  sin_evidencia: "Sin evidencia en la carpeta."
+  aviso: "> Aviso: la validación encontró problemas en este criterio."
+  fechas: Fechas en las instrucciones
+  tabla_fechas: "| Entregable | Fecha | Línea |"
+  hechos: Hechos revisados por script
+  no_verificable: Lo que no se pudo revisar
+  validacion: Validación de la respuesta del agente
+  valida: "Todas las citas son textuales ({citations}) y la evidencia citada existe ({evidence} entradas)."
+  invalida: "Se encontraron {count} problemas. Los criterios marcados no son confiables:"
+  invalida_uno: "Se encontró 1 problema. El criterio marcado no es confiable:"
+  pie: "Este reporte no hace la tarea: solo señala qué falta según las instrucciones."
