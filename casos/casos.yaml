@@ -49,7 +49,7 @@ casos:
     tarea: 953531
     carpeta: ../proyecto2
     momento: due
-    realidad: Nota completa. El profesor comentó commits posteriores a la fecha.
+    realidad: El profesor no señaló faltantes; comentó commits posteriores a la fecha.
     esperado:
       hechos: {git_after_due: warning, submission: ok}
       sin_falta: true
