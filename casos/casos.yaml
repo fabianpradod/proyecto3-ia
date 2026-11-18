@@ -1,0 +1,89 @@
+# Casos reales para probar el pre-flight. Las expectativas se escribieron ANTES de correr
+# la auditoría, a partir de lo que pasó de verdad con cada tarea (y no de lo que salió).
+# Las notas reales no se publican aquí; van solo en el informe.
+#
+# esperado:
+#   hechos: estado esperado de una revisión del script (check: estado).
+#   sin_cumple: ningún criterio puede quedar en "cumple" (no se entregó nada).
+#   sin_falta: ningún criterio puede quedar en "falta" (entrega completa; todo faltante es inventado).
+#   detecta: hallazgos que el agente debe hacer: un criterio en parcial o falta que cite una
+#            de esas líneas y mencione alguna de esas palabras.
+#   fechas: líneas que deben aparecer entre las fechas encontradas.
+
+curso: ~/Downloads/preflight_46981_assignments.json
+
+casos:
+  - id: lab6
+    nombre: Laboratorio 6 - Naive Bayes and Decision Trees
+    tarea: 947252
+    carpeta: ../lab6
+    momento: due
+    realidad: Nunca se entregó y no hay carpeta local.
+    esperado:
+      hechos: {folder: problem, submission: warning}
+      sin_cumple: true
+
+  - id: evaluaciones
+    nombre: Proyecto 2 - Evaluaciones de otros grupos
+    tarea: 958579
+    exportacion: ~/Downloads/preflight_46981_958579.json
+    carpeta: ~/.cache/preflight/casos/vacia
+    momento: due
+    realidad: Nunca se entregó. La plantilla adjunta no se leyó (la copia local es otra).
+    esperado:
+      hechos: {folder: problem, sources: warning}
+      sin_cumple: true
+
+  - id: hoja_notas
+    nombre: Hoja de notas Temas 4, 6 y 7
+    tarea: 954632
+    carpeta: ~/.cache/preflight/casos/vacia
+    momento: due
+    realidad: Nunca se entregó. La instrucción completa es una línea, sin criterios.
+    esperado:
+      hechos: {folder: problem, rubric: info}
+      sin_cumple: true
+
+  - id: proyecto2
+    nombre: Proyecto 2 - Machine Learning
+    tarea: 953531
+    carpeta: ../proyecto2
+    momento: due
+    realidad: Nota completa. El profesor comentó commits posteriores a la fecha.
+    esperado:
+      hechos: {git_after_due: warning, submission: ok}
+      sin_falta: true
+
+  - id: hoja_trabajo2
+    nombre: Presentación Algoritmo de Machine Learning en Parejas - Hoja de trabajo 2
+    tarea: 938815
+    carpeta: ~/.cache/preflight/casos/ht2
+    momento: due
+    realidad: Se restó por no explicar el método del codo (se mencionó sin explicarlo) y el profesor pidió el link del demo, que no se había entregado.
+    esperado:
+      detecta:
+        - {lineas: [L006, L024], palabras: [colab, demo, link, enlace]}
+        - {lineas: [L021, L022], palabras: [codo, elbow]}
+
+  - id: proyecto3
+    nombre: Proyecto 3 - Automatiza algo tuyo con IA
+    tarea: 959073
+    carpeta: .
+    momento: now
+    realidad: En curso. La tabla de exploración, el informe, la reflexión y la presentación todavía no están en el repositorio.
+    esperado:
+      hechos: {text_dates: warning, git_branch: warning}
+      detecta:
+        - {lineas: [L040, L011, L013, L015], palabras: [exploraci, tabla]}
+        - {lineas: [L043, L025, L026, L027, L028], palabras: [reflexi]}
+      fechas: [L031]
+
+  - id: proyecto2_sin_readme
+    nombre: Proyecto 2 sin README (copia modificada a propósito)
+    tarea: 953531
+    carpeta: ~/.cache/preflight/casos/p2-sin-readme
+    momento: due
+    realidad: Copia de Proyecto 2 sin el README, que la instrucción L029 pide de forma explícita.
+    esperado:
+      detecta:
+        - {lineas: [L029, L041], palabras: [readme]}

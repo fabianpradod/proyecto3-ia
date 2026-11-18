@@ -52,6 +52,22 @@ hechos:
   git_branch.warning: "{not_in_default} commits de la rama {branch} no están en {default}, la rama que ve quien revisa."
   git_after_due.ok: "No hay commits después de la fecha de entrega."
   git_after_due.warning: "Hay {count} commits con fecha posterior a la entrega: {commits}."
+casos:
+  titulo: Resultados de los casos reales
+  intro: "Prompt {prompt}, modelo {model}, {runs} corridas por caso. Las expectativas están en casos.yaml y se escribieron antes de correr."
+  tabla: "| Caso | Corrida | Expectativas cumplidas | En riesgo | Cumple / Parcial / Falta / No verificable | Validación | Tiempo |"
+  realidad: "Lo que pasó de verdad:"
+  expectativa: Expectativa
+  corrida: Corrida
+  marca_si: "sí"
+  marca_no: "no"
+  variacion: "Variación entre corridas: puntos en riesgo {risk}."
+  cambios: "Criterios que cambiaron de estado: {changed}."
+  sin_cambios: "Ningún criterio cambió de estado entre corridas."
+  reportes: "Reportes:"
+  error: "La corrida falló: {error}"
+  valida: ok
+  invalida: "{count} problemas"
 textos:
   revision: "Revisión como si se entregara el {as_of} (hora de Guatemala)."
   modelo: "Modelo: {model}. Prompt: {prompt}. {carpeta}"

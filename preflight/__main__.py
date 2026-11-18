@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .audit import PROMPT_VERSION, AuditError, run_audit
 from .canvas import Canvas, CanvasError, parse_assignment_ref
+from .cases import run_cases, write_results
 from .checks import resolve_as_of, run_checks
 from .config import ConfigError, load_settings
 from .export import ExportError, assignment_from_course, build_bookmarklet, read_export
@@ -157,6 +158,15 @@ def cmd_report(args, settings, canvas):
     print(write_report(work, audit, checks))
 
 
+def cmd_cases(args, settings, canvas):
+    work = Path(args.out or Path(settings["PREFLIGHT_WORK"]).expanduser() / "casos")
+    print(f"Running {args.runs} audits per case, {args.parallel} at a time, with {args.model}; results are written when all finish")
+    cases, done = run_cases(args.cases, work, runs=args.runs, parallel=args.parallel, model=args.model, only=args.only)
+    for result in done:
+        print(f"  {result['case']:<22} run {result['run']}: {'ERROR ' + result['error'][-120:] if 'error' in result else 'done'}")
+    print(write_results(cases, done, Path(args.cases).parent))
+
+
 def cmd_extract(args, settings, canvas):
     folder = args.folder.expanduser().resolve()
     out_dir = args.out or Path(settings["PREFLIGHT_WORK"]).expanduser() / "extract" / folder.name
@@ -202,6 +212,15 @@ def build_parser():
     audit.add_argument("--model", default="opus", help="Claude model alias for the agent (default: opus)")
     audit.add_argument("--out", type=Path, help="work folder (default: PREFLIGHT_WORK, ~/.cache/preflight)")
     audit.set_defaults(handler=cmd_audit)
+
+    cases = commands.add_parser("cases", help="run the audit on the real cases and score it against casos.yaml")
+    cases.add_argument("cases", type=Path, help="cases file, e.g. casos/casos.yaml")
+    cases.add_argument("--runs", type=int, default=2, help="audits per case (default 2)")
+    cases.add_argument("--parallel", type=int, default=3, help="audits running at the same time (default 3)")
+    cases.add_argument("--model", default="opus", help="Claude model alias (default: opus)")
+    cases.add_argument("--only", nargs="*", help="case ids to run")
+    cases.add_argument("--out", type=Path, help="work folder for the runs (default: <work>/casos)")
+    cases.set_defaults(handler=cmd_cases)
 
     report = commands.add_parser("report", help="write the Spanish report from a saved audit")
     report.add_argument("assignment_id", type=int, help="assignment id, already audited")
