@@ -14,7 +14,17 @@ hace la tarea ni escribe contenido de la entrega: solo la audita.
 
 ## Por qué esta herramienta
 
-Pendiente: justificación a partir de la tabla de exploración (`exploracion/`).
+La comparación con las otras herramientas está en la tabla de exploración (`exploracion/`).
+Para esta tarea quedó Claude Code porque la tarea pide revisar una carpeta completa sin
+tocarla, y Claude Code permite eso de forma verificable:
+
+- Lee carpetas, busca dentro de los archivos y lee PDF sin código adicional (Read, Grep, Glob).
+- Se puede correr sin herramientas de escritura (`--tools Read,Grep,Glob`). La garantía de
+  que solo audita la da la herramienta, no una petición en el prompt.
+- Corre sin interfaz (`claude -p`), así que un script le pasa una carpeta preparada.
+- Obliga a responder con un esquema JSON (`--json-schema`), que después se valida con
+  reglas fijas.
+- Es de pago: usa la suscripción Pro.
 
 ## Cómo funciona
 
@@ -116,12 +126,73 @@ revisados por script, lo que no se pudo revisar y el resultado de la validación
 
 ## Pruebas
 
-Pendiente.
+```bash
+python -m pytest
+python -m preflight cases casos/casos.yaml
+```
+
+- `pytest` corre 129 pruebas sin red: lectura de las instrucciones, fechas, revisiones de
+  git, extracción de docx, pptx y pdf (incluida una prueba de que un docx malicioso no
+  puede leer archivos del sistema), la carpeta aislada del agente, el validador y el reporte.
+- `cases` corre la auditoría completa sobre 7 casos reales, dos veces cada uno, y compara
+  el resultado con las expectativas de `casos/casos.yaml`. Las expectativas se escribieron
+  y se subieron al repositorio antes de correr (commit 5a2e087); los resultados llegaron
+  después (commit f13e914).
+- Los límites del agente se comprobaron con archivos trampa: un intento de leer un archivo
+  fuera de su carpeta quedó bloqueado y registrado.
 
 ## Resultados
 
-Pendiente.
+Prompt v1, modelo claude-opus-5, 7 casos, 2 corridas por caso. Se cumplieron 38 de 40
+expectativas. Detalle y los 14 reportes: [casos/resultados.md](casos/resultados.md).
+
+| Caso | Qué se esperaba | Resultado |
+|---|---|---|
+| Laboratorio 6, nunca entregado | Todo en falta, carpeta inexistente | Sí, en las dos corridas |
+| Evaluaciones de Proyecto 2, nunca entregado | Todo en falta, aviso de plantilla adjunta sin leer | Sí, en las dos |
+| Hoja de notas 4, 6 y 7, nunca entregada | En falta sin inventar criterios (la instrucción es una línea) | Sí: un solo criterio |
+| Proyecto 2, sin faltantes según el profesor | No inventar faltantes | Sí: 0 de 100 puntos en riesgo; además marcó un commit posterior a la fecha |
+| Hoja de trabajo 2 | Falta el link al Colab y no se explicó el método del codo | Colab sí; método del codo no, en ninguna corrida |
+| Proyecto 3, en curso | Exploración y reflexión faltantes, fecha del 11 de noviembre, trabajo fuera de main | Sí, en las dos |
+| Proyecto 2 sin README, copia modificada | Detectar el README faltante | Sí, en las dos |
+
+Dónde falla y por qué:
+
+- **Criterios que no están escritos.** En la Hoja de trabajo 2 el profesor restó por no
+  explicar el método del codo, pero la instrucción solo pide "qué se puede ajustar y qué
+  efecto tiene". La presentación nombra el codo y cubre el efecto de cada hiperparámetro,
+  así que el agente lo dio por cumplido. El agente revisa contra el texto; lo que se espera
+  sin escribirse no lo ve.
+- **Señales que ignora.** La presentación entregada todavía tenía una nota del orador con
+  "TODO 4.4" sobre la figura del codo. El agente no la tomó como señal de algo pendiente.
+- **Errores de formato, atrapados por el validador** en 2 de 14 corridas: dos citas armadas
+  con pedazos de una línea en vez de copiadas textuales, y un "archivo de evidencia" que no
+  era un camino ("(carpeta de la entrega)").
+- **Variación entre corridas.** Con la misma entrada, Proyecto 3 dio 80 y 78 puntos en
+  riesgo, y en la Hoja de trabajo 2 un criterio salió parcial en una corrida y cumple en la
+  otra.
+
+Cada auditoría tardó entre 22 y 222 segundos, más un clic en Canvas para exportar la tarea.
 
 ## Limitaciones
 
-Pendiente.
+- Revisa contra las instrucciones escritas. Lo que el profesor espera sin escribirlo no se
+  detecta, y lo oral (presentación en vivo) queda como no verificable.
+- El agente no es determinista: dos corridas pueden diferir en el estado de un criterio o
+  en los puntos estimados de un parcial.
+- Al revisar tareas pasadas con `--as-of due` solo se retroceden el historial de git y el
+  estado de la entrega en Canvas; la carpeta se revisa como está hoy.
+- En Word, los títulos solo se reconocen si usan estilos de título.
+- No revisa archivos ocultos, secretos, binarios, archivos de más de 2 MB ni archivos que
+  git ignora; solo los lista en el inventario.
+- En UVG cada tarea se exporta con un clic y los archivos adjuntos se descargan a mano.
+- Lo que sale de la máquina: la copia de la entrega, el texto extraído y las instrucciones
+  se envían a Anthropic al correr la auditoría. Las notas, los comentarios del profesor y
+  los archivos ocultos no se envían.
+- Usa la cuota de la suscripción. En el plan Pro, el alias `opus` corrió como
+  claude-opus-5; el reporte guarda el modelo real.
+
+Mejoras posibles para un prompt v2: pedir "." para referirse a toda la carpeta, exigir que
+cada cita sea un solo fragmento continuo de una línea, y agregar una revisión fija de
+marcas como TODO o "pendiente" en la entrega. Esta última surgió del caso de la Hoja de
+trabajo 2, así que ese caso ya no serviría como prueba independiente de esa mejora.
