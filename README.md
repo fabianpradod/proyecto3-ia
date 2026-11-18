@@ -14,7 +14,6 @@ hace la tarea ni escribe contenido de la entrega: solo la audita.
 
 ## Por qué esta herramienta
 
-La comparación con las otras herramientas está en la tabla de exploración (`exploracion/`).
 Para esta tarea quedó Claude Code porque la tarea pide revisar una carpeta completa sin
 tocarla, y Claude Code permite eso de forma verificable:
 
@@ -173,6 +172,23 @@ Dónde falla y por qué:
   otra.
 
 Cada auditoría tardó entre 22 y 222 segundos, más un clic en Canvas para exportar la tarea.
+
+## Capturas del proceso
+
+En `capturas/`:
+
+- `01`: captura de pantalla de Canvas con el botón "Nuevo token de acceso" deshabilitado
+  para estudiantes, recortada para quitar las pestañas del navegador y la foto de perfil.
+- `02` a `08`: imágenes de la salida real de cada comando, generadas a partir del texto que
+  imprimió; no son capturas de pantalla. En `02` se quitó la columna de notas.
+    - `02` lista del curso con las tareas vencidas sin entrega
+    - `03` importar Proyecto 3
+    - `04` revisiones fijas de Proyecto 3
+    - `05` una auditoría completa en vivo
+    - `06` el reporte de Proyecto 3
+    - `07` la tabla de los casos reales
+    - `08` la prueba de aislamiento del agente (lectura fuera de su carpeta bloqueada)
+- `09`: diagrama del flujo de seis pasos.
 
 ## Limitaciones
 
