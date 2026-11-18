@@ -1,0 +1,63 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["resumen", "criterios", "fechas", "no_verificable"],
+  "properties": {
+    "resumen": {"type": "string", "maxLength": 500},
+    "criterios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterio", "puntos", "estado", "puntos_en_riesgo", "citas", "evidencia", "observacion"],
+        "properties": {
+          "criterio": {"type": "string", "maxLength": 200},
+          "puntos": {"type": ["number", "null"]},
+          "estado": {"enum": ["cumple", "parcial", "falta", "no_verificable"]},
+          "puntos_en_riesgo": {"type": ["number", "null"]},
+          "citas": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["linea", "texto"],
+              "properties": {
+                "linea": {"type": "string", "pattern": "^L[0-9]{3,}$"},
+                "texto": {"type": "string", "minLength": 3, "maxLength": 300}
+              }
+            }
+          },
+          "evidencia": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["archivo", "detalle"],
+              "properties": {
+                "archivo": {"type": "string", "maxLength": 300},
+                "detalle": {"type": "string", "maxLength": 300}
+              }
+            }
+          },
+          "observacion": {"type": "string", "maxLength": 400}
+        }
+      }
+    },
+    "fechas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["entregable", "fecha", "linea", "texto"],
+        "properties": {
+          "entregable": {"type": "string", "maxLength": 200},
+          "fecha": {"type": "string", "maxLength": 40},
+          "linea": {"type": "string", "pattern": "^L[0-9]{3,}$"},
+          "texto": {"type": "string", "maxLength": 300}
+        }
+      }
+    },
+    "no_verificable": {"type": "array", "items": {"type": "string", "maxLength": 300}}
+  }
+}
