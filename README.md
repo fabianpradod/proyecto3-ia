@@ -1,7 +1,8 @@
 # Pre-flight: revisar una entrega antes de enviarla
 
 Proyecto 3 de Inteligencia Artificial (UVG, 2026): "Automatiza algo tuyo con IA".
-Es la tarea 1 de mi lluvia de ideas.
+Es la tarea 1 de mi [lluvia de ideas](lluvia-de-ideas.md). El informe está en
+[informe/informe.md](informe/informe.md).
 
 ## Qué hace
 
@@ -14,8 +15,11 @@ hace la tarea ni escribe contenido de la entrega: solo la audita.
 
 ## Por qué esta herramienta
 
-Para esta tarea quedó Claude Code porque la tarea pide revisar una carpeta completa sin
-tocarla, y Claude Code permite eso de forma verificable:
+Decidí usar Claude Code porque pago la suscripción Pro y ya trabajo en este entorno, lo que
+me llevó a elegirlo. Pero decidí usar Opus en vez de Sonnet por su razonamiento.
+
+Además, la tarea pide revisar una carpeta completa sin tocarla, y Claude Code permite eso de
+forma verificable:
 
 - Lee carpetas, busca dentro de los archivos y lee PDF sin código adicional (Read, Grep, Glob).
 - Se puede correr sin herramientas de escritura (`--tools Read,Grep,Glob`). La garantía de
@@ -172,6 +176,9 @@ Dónde falla y por qué:
   otra.
 
 Cada auditoría tardó entre 22 y 222 segundos, más un clic en Canvas para exportar la tarea.
+A mano, revisar una tarea me toma de 30 a 45 minutos; con el pre-flight, unos 10. La
+configuración se recupera después de 6 a 9 tareas (cálculo en el
+[informe](informe/informe.md)).
 
 ## Capturas del proceso
 
