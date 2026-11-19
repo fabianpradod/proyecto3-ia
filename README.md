@@ -2,7 +2,9 @@
 
 Proyecto 3 de Inteligencia Artificial (UVG, 2026): "Automatiza algo tuyo con IA".
 Es la tarea 1 de mi [lluvia de ideas](lluvia-de-ideas.md). El informe está en
-[informe/informe.md](informe/informe.md).
+[informe/Informe-Proyecto3.docx](informe/Informe-Proyecto3.docx) (también en
+[Markdown](informe/informe.md)) y la reflexión aparte en
+[informe/Reflexion-Proyecto3.docx](informe/Reflexion-Proyecto3.docx).
 
 ## Qué hace
 
