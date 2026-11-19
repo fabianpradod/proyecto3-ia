@@ -2,13 +2,11 @@
 
 Fabian Prado. Inteligencia Artificial, UVG. 18 de noviembre de 2026.
 
-Pre-flight revisa una entrega contra las instrucciones de Canvas antes de enviarla y dice
-qué puntos se perderían, citando la instrucción en la que se basa. No hace la tarea: solo
-la audita. Cómo reproducirlo está en el [README](../README.md).
+Repositorio y reproducción: [README](../README.md).
 
 ## 1. Tarea elegida
 
-Es la tarea 1 de mi [lluvia de ideas](../lluvia-de-ideas.md).
+Lista completa: [lluvia de ideas](../lluvia-de-ideas.md), tarea 1.
 
 Elegí esta tarea ya que de las 5 estaba entre dos: esta y búsqueda de trabajo. A pesar de
 eso, tomando en cuenta que esta tarea podría facilitar y optimizar de gran manera mis
@@ -26,14 +24,17 @@ me llevó a elegirlo. Pero decidí usar Opus en vez de Sonnet por su razonamient
 
 ![Flujo del pre-flight](../capturas/09-diagrama-del-flujo.png)
 
-Solo el paso 4 usa IA. Los demás son reglas fijas en Python: exportar la tarea desde
-Canvas con un marcador del navegador, numerar las instrucciones, revisar fechas y git, y
-validar que cada cita del agente sea textual y que la carpeta no haya cambiado.
+Detalle de cada paso: [README](../README.md).
 
 ## 4. Resultados de las pruebas
 
-Siete casos reales, dos corridas cada uno. Las expectativas se subieron a git antes de
-correr (commit 5a2e087) y los resultados después (commit f13e914). Se cumplieron 38 de 40.
+| Dato | Valor |
+|---|---|
+| Casos reales | 7 |
+| Corridas por caso | 2 |
+| Expectativas cumplidas | 38 de 40 |
+| Commit de las expectativas (antes de correr) | 5a2e087 |
+| Commit de los resultados | f13e914 |
 
 | Caso | Lo que pasó de verdad | Lo que dijo el pre-flight |
 |---|---|---|
@@ -68,15 +69,14 @@ A mano, revisar una tarea contra su rúbrica me toma de 30 a 45 minutos, dependi
 cantidad de secciones que tenga una tarea, y puede ser hasta más cuando suben PDFs confusos
 con muchas secciones y redacción extraña.
 
-| | Minutos |
+| Concepto | Valor |
 |---|---|
-| A mano, por tarea | 30 a 45 |
-| Con pre-flight, por tarea: exportar, auditar (22 a 222 s) y leer el reporte (se supone unos 5) | 10 o menos |
-| Ahorro por tarea | 20 a 35 |
-| Configuración (16 y 18 de noviembre, según los commits) | unos 180 |
-
-La configuración se recupera después de 6 a 9 tareas. Este curso tuvo 25 tareas en Canvas
-este semestre.
+| A mano, por tarea | 30 a 45 min |
+| Con pre-flight, por tarea: exportar, auditar (22 a 222 s) y leer el reporte (se supone unos 5 min) | 10 min o menos |
+| Ahorro por tarea | 20 a 35 min |
+| Configuración (16 y 18 de noviembre, según los commits) | unos 180 min |
+| Tareas para recuperar la configuración | 6 a 9 |
+| Tareas de este curso en Canvas este semestre | 25 |
 
 ## 7. Reflexión: la IA frente a los humanos
 
@@ -109,11 +109,3 @@ por curso; el profesor podría crear uno para que todos lo usen como linter.
 - No salieron: notas, comentarios del profesor ni archivos ocultos o con secretos.
 - De Canvas: los datos salieron de mi sesión del navegador, porque UVG no permite que los
   estudiantes creen tokens de la API.
-
-## Uso de IA
-
-Mis respuestas, dadas en una entrevista, son las secciones 1 y 2, el párrafo de por qué
-creo que falla (sección 5), el tiempo a mano (sección 6) y toda la sección 7. Se pasaron al
-informe sin cambiar su contenido: solo se corrigieron acentos y errores de escritura, y la
-sección 2 se tradujo del inglés. El código, el README, las descripciones técnicas de las
-secciones 3 a 5, las tablas y la sección 8 se hicieron con Claude Code.
