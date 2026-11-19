@@ -96,6 +96,12 @@ preferencias. Si se equivoca, el estudiante es el que pierde puntos, por lo que 
 que el profesor debería tener un agente como este en el curso para que los estudiantes
 puedan usarlo como un linter, pero de su entrega completa y no solo de su código.
 
+**Qué dejé de hacer.** Dejé de revisar a mano la rúbrica antes de entregar. Está bien
+delegarlo porque yo estoy propenso a tomar mi lado.
+
+**Qué trabajos o habilidades cambian.** Estudiantes, uno por curso; auxiliares, igual, uno
+por curso; el profesor podría crear uno para que todos lo usen como linter.
+
 ## 8. Datos que salieron de la máquina
 
 - A Anthropic, en cada auditoría: la copia de la entrega, el texto extraído de sus
